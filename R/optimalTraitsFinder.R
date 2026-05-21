@@ -1,10 +1,3 @@
-library(phangorn)
-library(ggtree)
-library(R6)
-library(treeio)
-library(phytools)
-library(stringr)
-library(ggplot2)
 #' Optimal Traits Finder Class
 #'
 #' @description
@@ -52,10 +45,3 @@ optimalTraitsFinder <- R6Class("optimalTraitsFinder",
     }
   )
 )
-
-thing <- optimalTraitsFinder$new("C:/users/joelh/Documents/GitHub/pots-project/optimal_traits/trees")
-thing$calculate_RF_distances()
-thing$generate_RF_heatmap()
-thing$RF_distances
-thing$trees
-length(thing$trees)

@@ -12,7 +12,7 @@
 treeProcessor <- R6Class("treeProcessor",
   public = list(
     data = NULL,
-    initialize = function(filename) {
+    initialize = function(filename, plotname = "tree.png") {
       self$data <- read.beast(filename)
     },
     tree_with_images = function(image_dir) {
@@ -29,7 +29,13 @@ treeProcessor <- R6Class("treeProcessor",
           offset   = 0,
           size     = 0.01
         )
-      print(plot)
+
+      ggsave(
+        filename = plotname,
+        background = "white",
+        width = 10,
+        height = 10
+      )
     }
   )
 )

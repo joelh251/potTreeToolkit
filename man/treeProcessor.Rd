@@ -20,7 +20,7 @@ Read and plots trees
 \subsection{\code{treeProcessor$new()}}{
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{treeProcessor$new(filename)}
+    \preformatted{treeProcessor$new(filename, plotname = "tree.png")}
     \if{html}{\out{</div>}}
   }
 }

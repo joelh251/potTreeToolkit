@@ -7,7 +7,7 @@
 #' @import tidyr
 #' @import dplyr
 #' @importFrom scales hue_pal
-#' @importFrom readr read_tsv
+#' @importFrom readr write_tsv
 #' @importFrom ape as.phylo
 #' @importFrom ape write.nexus.data
 #'
@@ -20,6 +20,8 @@ potDataProcessor <- R6Class("potDataProcessor",
     PCA_data = NULL,
     scaled_taxa_data = NULL,
     raw_pca_output = NULL,
+    pair_sample_character_data = NULL,
+    pair_sample_taxa_data = NULL,
     initialize = function(data) {
       self$data <- data
     },
@@ -50,11 +52,14 @@ potDataProcessor <- R6Class("potDataProcessor",
       taxa_data <- na.omit(taxa_data)
 
       no_age_range <- taxa_data$taxon[(taxa_data$max_age-taxa_data$min_age) == 0]
+
       if (length(no_age_range) > 0) {
-        warning("The following taxa have been excluded due to having an age range of 0:\n",
+        warning("The following taxa have had their age range expanded +- 25 years due to having an age range of 0:\n",
                 paste(no_age_range, collapse = "\n"),
                 call. = FALSE)
-        taxa_data <- taxa_data[!(taxa_data$taxon %in% no_age_range),]
+        taxa_data <- taxa_data %>%
+          mutate(min_age = ifelse(taxon %in% no_age_range, min_age - 25, min_age)) %>%
+          mutate(max_age = ifelse(taxon %in% no_age_range, max_age + 25, max_age))
       }
 
       # Only save characters which explain a proportion of variance > 0
@@ -159,7 +164,6 @@ potDataProcessor <- R6Class("potDataProcessor",
       groups      <- sort(unique(self$data$shape))
       n           <- length(groups)
       pot_palette <- setNames(hue_pal()(n), groups)
-      #TODO adjust code
 
       if (!dir.exists(save_dir)) dir.create(save_dir, recursive = TRUE)
 
@@ -186,6 +190,72 @@ potDataProcessor <- R6Class("potDataProcessor",
 
       if (save_dir != "") {
         write_tsv(self$scaled_taxa_data, paste0(save_dir, "/", filename, ".tsv"))
+      }
+    },
+    make_pot_pairs = function(time_bins = 100, n_PCs=15) {
+      if (is.null(self$PCA_data)) {
+        self$generate_revbayes_data()
+        warning("Input data not processed. Running self$generate_revbayes_data()")
+      }
+
+      if (!"time_bin" %in% colnames(self$data)) {
+        private$form_time_bins(bin = time_bins)
+      }
+
+      self$data$pair <- NA
+
+      self_ref <- self
+
+      self$data %>%
+        group_by(time_bin) %>%
+        group_walk(~ private$cluster_pairs(.x, .y, n_PCs = n_PCs, self_ref = self_ref))
+
+      message("Generated ", length(unique(self$data$pair)), " pairs")
+
+    },
+    pot_pair_sample = function(sets = 1,
+                               n=25,
+                               save_dir = "",
+                               taxa_data_filename="pair_sample_taxa_data",
+                               character_data_filename="pair_sample_character_data",
+                               time_bins=100,
+                               n_PCs=15) {
+      if (!"pair" %in% colnames(self$data)) {
+        self$make_pot_pairs(time_bins = time_bins, n_PCs = n_PCs)
+      }
+
+      if (sets == 1) {
+        pairs <- sample(unique(self$data$pair), n, replace=FALSE)
+        pair_names <- unique(self$data$type[self$data$pair %in% pairs])
+
+        self$pair_sample_character_data <- self$character_data[rownames(self$character_data) %in% pair_names,]
+        self$pair_sample_taxa_data <- self$taxa_data[self$taxa_data$taxon %in% pair_names,]
+
+        if (save_dir != "") {
+          char_filepath <- paste0(save_dir, "/", character_data_filename, ".nex")
+          taxa_filepath <- paste0(save_dir, "/", taxa_data_filename, ".tsv")
+
+          write.nexus.data(self$pair_sample_character_data, file = char_filepath, format = "continuous")
+          write_tsv(self$pair_sample_taxa_data, taxa_filepath)
+        }
+      }
+
+      if (sets > 1) {
+        for (i in 1:sets) {
+          pairs <- sample(unique(self$data$pair), n, replace=FALSE)
+          pair_names <- unique(self$data$type[self$data$pair %in% pairs])
+
+          pair_sample_character_data <- self$character_data[rownames(self$character_data) %in% pair_names,]
+          pair_sample_taxa_data <- self$taxa_data[self$taxa_data$taxon %in% pair_names,]
+
+          if (save_dir != "") {
+            char_filepath <- paste0(save_dir, "/", character_data_filename, "_", i, ".nex")
+            taxa_filepath <- paste0(save_dir, "/", taxa_data_filename, "_", i, ".tsv")
+
+            write.nexus.data(pair_sample_character_data, file = char_filepath, format = "continuous")
+            write_tsv(pair_sample_taxa_data, taxa_filepath)
+          }
+        }
       }
     }
   ),
@@ -229,6 +299,46 @@ potDataProcessor <- R6Class("potDataProcessor",
           height   = 5,
           dpi      = 300
         )
+      },
+    form_time_bins = function(bin = 100) {
+      self$data <- self$data %>%
+        mutate(time_bin = floor(date_earliest / bin) * bin)
+    },
+    cluster_pairs = function(.x, .y, n_PCs = 15, self_ref) {
+
+      if (length(unique(.x$type)) < 2) {
+        self_ref$data$pair[self_ref$data$type %in% .x$type] <- paste0(.y$time_bin, "_unpaired")
+        return()
       }
+
+      pca_subset <- self_ref$PCA_data %>%
+        filter(id %in% .x$type) %>%
+        select(id, 1:n_PCs)
+
+      cluster_matrix <- as.matrix(pca_subset[, -1])
+      rownames(cluster_matrix) <- pca_subset$id
+      cluster_matrix <- scale(cluster_matrix)
+
+      d  <- dist(cluster_matrix, method = "euclidean")
+      hc <- hclust(d, method = "ward.D2")
+
+      n_taxa  <- nrow(pca_subset)
+      n_pairs <- floor(n_taxa / 2)
+
+      clusters <- cutree(hc, k = n_pairs)
+
+      for (i in seq_len(n_pairs)) {
+        pair_taxa  <- names(clusters[clusters == i])
+        pair_label <- paste0(.y$time_bin, "_", i)
+        self_ref$data$pair[self_ref$data$type %in% pair_taxa &
+                             self_ref$data$time_bin == .y$time_bin] <- pair_label
+      }
+
+      if (n_taxa %% 2 != 0) {
+        unpaired <- names(clusters[clusters == max(clusters)])
+        self_ref$data$pair[self_ref$data$type %in% unpaired &
+                             self_ref$data$time_bin == .y$time_bin] <- paste0(.y$time_bin, "_unpaired")
+      }
+    }
   )
 )

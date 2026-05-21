@@ -2,3 +2,4 @@
 ^renv\.lock$
 ^potTreeToolkit\.Rproj$
 ^\.Rproj\.user$
+^test/

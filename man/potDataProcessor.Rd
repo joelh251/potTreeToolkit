@@ -17,6 +17,8 @@ Process pot data and generate basic plots
     \item \href{#method-potDataProcessor-generate_pot_images}{\code{potDataProcessor$generate_pot_images()}}
     \item \href{#method-potDataProcessor-summarise_pot_profiles}{\code{potDataProcessor$summarise_pot_profiles()}}
     \item \href{#method-potDataProcessor-scale_taxa_data}{\code{potDataProcessor$scale_taxa_data()}}
+    \item \href{#method-potDataProcessor-make_pot_pairs}{\code{potDataProcessor$make_pot_pairs()}}
+    \item \href{#method-potDataProcessor-pot_pair_sample}{\code{potDataProcessor$pot_pair_sample()}}
     \item \href{#method-potDataProcessor-clone}{\code{potDataProcessor$clone()}}
   }
 }
@@ -108,6 +110,35 @@ Process pot data and generate basic plots
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$scale_taxa_data(save_dir = "", filename = "scaled_taxa_data")}
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-potDataProcessor-make_pot_pairs"></a>}}
+\if{latex}{\out{\hypertarget{method-potDataProcessor-make_pot_pairs}{}}}
+\subsection{\code{potDataProcessor$make_pot_pairs()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{potDataProcessor$make_pot_pairs(time_bins = 100, n_PCs = 15)}
+    \if{html}{\out{</div>}}
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-potDataProcessor-pot_pair_sample"></a>}}
+\if{latex}{\out{\hypertarget{method-potDataProcessor-pot_pair_sample}{}}}
+\subsection{\code{potDataProcessor$pot_pair_sample()}}{
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{potDataProcessor$pot_pair_sample(
+  n = 25,
+  save_dir = "",
+  taxa_data_filename = "pair_sample_taxa_data",
+  character_data_filename = "pair_sample_taxa_data",
+  time_bins = 100,
+  n_PCs = 15
+)}
     \if{html}{\out{</div>}}
   }
 }
