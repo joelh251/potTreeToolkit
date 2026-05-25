@@ -6,12 +6,26 @@
 \description{
 Finds the optimal no. traits for a phylogeny
 }
+\section{Public fields}{
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{trees}}{Named list of trees as phylo objects}
+
+    \item{\code{tree_files}}{Named list of trees as beast objects}
+
+    \item{\code{RF_distances}}{Dataframe of pairwise RF distances}
+
+    \item{\code{mean_posteriors}}{Dataframe of mean posterior probabilities for each tree}
+  }
+  \if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-optimalTraitsFinder-initialize}{\code{optimalTraitsFinder$new()}}
     \item \href{#method-optimalTraitsFinder-calculate_RF_distances}{\code{optimalTraitsFinder$calculate_RF_distances()}}
     \item \href{#method-optimalTraitsFinder-generate_RF_heatmap}{\code{optimalTraitsFinder$generate_RF_heatmap()}}
+    \item \href{#method-optimalTraitsFinder-mean_posterior_support}{\code{optimalTraitsFinder$mean_posterior_support()}}
     \item \href{#method-optimalTraitsFinder-clone}{\code{optimalTraitsFinder$clone()}}
   }
 }
@@ -19,10 +33,23 @@ Finds the optimal no. traits for a phylogeny
 \if{html}{\out{<a id="method-optimalTraitsFinder-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-optimalTraitsFinder-initialize}{}}}
 \subsection{\code{optimalTraitsFinder$new()}}{
+  Initialises optimalTraitsFinder class
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{optimalTraitsFinder$new(tree_dir)}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{tree_dir}}{Location of tree files}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    trees
+
+tree_files
   }
 }
 
@@ -30,10 +57,14 @@ Finds the optimal no. traits for a phylogeny
 \if{html}{\out{<a id="method-optimalTraitsFinder-calculate_RF_distances"></a>}}
 \if{latex}{\out{\hypertarget{method-optimalTraitsFinder-calculate_RF_distances}{}}}
 \subsection{\code{optimalTraitsFinder$calculate_RF_distances()}}{
+  Calculates pairwise normalised RF distances for input trees
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{optimalTraitsFinder$calculate_RF_distances()}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    RF_distances
   }
 }
 
@@ -41,10 +72,29 @@ Finds the optimal no. traits for a phylogeny
 \if{html}{\out{<a id="method-optimalTraitsFinder-generate_RF_heatmap"></a>}}
 \if{latex}{\out{\hypertarget{method-optimalTraitsFinder-generate_RF_heatmap}{}}}
 \subsection{\code{optimalTraitsFinder$generate_RF_heatmap()}}{
+  Plots a heatmap of RF distances
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{optimalTraitsFinder$generate_RF_heatmap()}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Heatmap of RF distances
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-optimalTraitsFinder-mean_posterior_support"></a>}}
+\if{latex}{\out{\hypertarget{method-optimalTraitsFinder-mean_posterior_support}{}}}
+\subsection{\code{optimalTraitsFinder$mean_posterior_support()}}{
+  Calculates mean posterior probability of nodes in each tree
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{optimalTraitsFinder$mean_posterior_support()}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    mean_posteriors
   }
 }
 

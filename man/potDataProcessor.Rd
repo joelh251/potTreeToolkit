@@ -6,13 +6,36 @@
 \description{
 Process pot data and generate basic plots
 }
+\section{Public fields}{
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{data}}{Raw pot data}
+
+    \item{\code{character_data}}{Formatted PCA data for each pot, only PCs with variance > 0}
+
+    \item{\code{taxa_data}}{Min and max ages of each pot}
+
+    \item{\code{PCA_data}}{All PCs}
+
+    \item{\code{scaled_taxa_data}}{Ages scaled relative to youngest taxon}
+
+    \item{\code{raw_pca_output}}{Raw output of prcomp function}
+
+    \item{\code{pair_sample_character_data}}{Subset of character data}
+
+    \item{\code{pair_sample_taxa_data}}{Subset of taxa data}
+
+    \item{\code{dendrogram}}{Ward tree of pots as a phylo object}
+  }
+  \if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-potDataProcessor-initialize}{\code{potDataProcessor$new()}}
     \item \href{#method-potDataProcessor-generate_revbayes_data}{\code{potDataProcessor$generate_revbayes_data()}}
     \item \href{#method-potDataProcessor-PC_plot}{\code{potDataProcessor$PC_plot()}}
-    \item \href{#method-potDataProcessor-dendrogram}{\code{potDataProcessor$dendrogram()}}
+    \item \href{#method-potDataProcessor-plot_dendrogram}{\code{potDataProcessor$plot_dendrogram()}}
     \item \href{#method-potDataProcessor-generate_pot_image}{\code{potDataProcessor$generate_pot_image()}}
     \item \href{#method-potDataProcessor-generate_pot_images}{\code{potDataProcessor$generate_pot_images()}}
     \item \href{#method-potDataProcessor-summarise_pot_profiles}{\code{potDataProcessor$summarise_pot_profiles()}}
@@ -26,9 +49,17 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-initialize}{}}}
 \subsection{\code{potDataProcessor$new()}}{
+  Initialises potDataProcessor class
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$new(data)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{Dataframe of pot data}
+    }
     \if{html}{\out{</div>}}
   }
 }
@@ -37,6 +68,9 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-generate_revbayes_data"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-generate_revbayes_data}{}}}
 \subsection{\code{potDataProcessor$generate_revbayes_data()}}{
+  Transforms input data into a RevBayes-suitable format.
+
+Optionally saves data as a .nex and .tsv file.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$generate_revbayes_data(
@@ -46,27 +80,70 @@ Process pot data and generate basic plots
 )}
     \if{html}{\out{</div>}}
   }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{save_dir}}{Directory to save outputs to}
+      \item{\code{character_data_filename}}{Filename without extension}
+      \item{\code{taxa_data_filename}}{Filename without extension}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    character_data (optionally saved as a .nex file)
+
+taxa_data (optionally saved as a .tsv file)
+
+PCA_data
+
+raw_pca_output
+  }
 }
 
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-potDataProcessor-PC_plot"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-PC_plot}{}}}
 \subsection{\code{potDataProcessor$PC_plot()}}{
+  Creates a plot of PCA results
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$PC_plot(cols = c("PC1", "PC2"), add_elipses = FALSE)}
     \if{html}{\out{</div>}}
   }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{cols}}{A vector of 2 column names to plot}
+      \item{\code{add_elipses}}{Logical, dictates whether elipses are drawn around clusters}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    2 axis PCA plot
+  }
 }
 
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-potDataProcessor-dendrogram"></a>}}
-\if{latex}{\out{\hypertarget{method-potDataProcessor-dendrogram}{}}}
-\subsection{\code{potDataProcessor$dendrogram()}}{
+\if{html}{\out{<a id="method-potDataProcessor-plot_dendrogram"></a>}}
+\if{latex}{\out{\hypertarget{method-potDataProcessor-plot_dendrogram}{}}}
+\subsection{\code{potDataProcessor$plot_dendrogram()}}{
+  Generates a Ward tree of pots
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{potDataProcessor$dendrogram(n = 10)}
+    \preformatted{potDataProcessor$plot_dendrogram(n = 10)}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{n}}{Number of PCs to use in distance calculations}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Dendrogram plot
+
+dendrogram - phylo object of dendrogram
   }
 }
 
@@ -74,10 +151,27 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-generate_pot_image"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-generate_pot_image}{}}}
 \subsection{\code{potDataProcessor$generate_pot_image()}}{
+  UNFINISHED
+
+Generates an image of a single pot profile
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$generate_pot_image(data, name, save_dir = "")}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{REMOVE}
+      \item{\code{name}}{Name of pot}
+      \item{\code{save_dir}}{Location to save image (don't include filename)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Image of a single pot
+
+Optional - saves image to .png file
   }
 }
 
@@ -85,10 +179,21 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-generate_pot_images"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-generate_pot_images}{}}}
 \subsection{\code{potDataProcessor$generate_pot_images()}}{
+  Generates images of all pots in data and saves to .png files
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$generate_pot_images(save_dir)}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{save_dir}}{Location to save pot images (don't include filenames)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    A directory of pot images
   }
 }
 
@@ -96,10 +201,18 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-summarise_pot_profiles"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-summarise_pot_profiles}{}}}
 \subsection{\code{potDataProcessor$summarise_pot_profiles()}}{
+  UNFINISHED
+
+Creates a figure with all pot profiles
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$summarise_pot_profiles()}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Figure of all pot profiles
+
+Optional - saves to a .pdf file
   }
 }
 
@@ -107,10 +220,24 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-scale_taxa_data"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-scale_taxa_data}{}}}
 \subsection{\code{potDataProcessor$scale_taxa_data()}}{
+  Scales all pot ages relative to the youngest taxon
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$scale_taxa_data(save_dir = "", filename = "scaled_taxa_data")}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{save_dir}}{Location to save output}
+      \item{\code{filename}}{Name of output file (don't include extension)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    scaled_taxa_data
+
+Optional - saves output to a .tsv file
   }
 }
 
@@ -118,10 +245,21 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-make_pot_pairs"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-make_pot_pairs}{}}}
 \subsection{\code{potDataProcessor$make_pot_pairs()}}{
+  Uses HCA to group pots into pairs by greates shape similarity
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{potDataProcessor$make_pot_pairs(time_bins = 100, n_PCs = 15)}
+    \preformatted{potDataProcessor$make_pot_pairs(n_PCs = 15)}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{n_PCs}}{Number of PCs to feed into HCA (default = 15)}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Pair column in data with pair identity of all pots
   }
 }
 
@@ -129,17 +267,63 @@ Process pot data and generate basic plots
 \if{html}{\out{<a id="method-potDataProcessor-pot_pair_sample"></a>}}
 \if{latex}{\out{\hypertarget{method-potDataProcessor-pot_pair_sample}{}}}
 \subsection{\code{potDataProcessor$pot_pair_sample()}}{
+  Randomly samples (without replacement) a given number of pot pairs into
+a subset of the total data.
+
+Automatically numbers output files if generating multiple subsets.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{potDataProcessor$pot_pair_sample(
+  sets = 1,
   n = 25,
   save_dir = "",
   taxa_data_filename = "pair_sample_taxa_data",
-  character_data_filename = "pair_sample_taxa_data",
-  time_bins = 100,
+  character_data_filename = "pair_sample_character_data",
   n_PCs = 15
 )}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{sets}}{Number of subsets to form}
+      \item{\code{n}}{Number of pairs to sample}
+      \item{\code{save_dir}}{Location to save output files}
+      \item{\code{taxa_data_filename}}{Name for taxa data file (don't include extension)}
+      \item{\code{character_data_filename}}{Name for character data file (don't include extension)}
+      \item{\code{n_PCs}}{Number of PCs to use in pot pairing algorithm}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    pair_sample_character_data
+
+pair_sample_taxa_data
+
+Optional - saves outputs to a directory
+description
+Converts dates from BCE/AD to years before present
+param date Date
+description
+Generates a single pot image.
+
+Designed to work with dplyr
+param .x Data
+param .y Grouping variables
+param save_dir Location to save images
+param palette Colour palette
+return
+Pot image
+description
+Divides taxa into time bins
+param bin Size of time bin in years
+description
+HCA pair clustering algorithm
+param .data Data
+param n_PCs Number of PCs to cluster by (default = 15)
+param self_ref Allows function to write to class
+return
+Pair identities
   }
 }
 

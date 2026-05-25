@@ -1,11 +1,13 @@
 Package: potTreeToolkit
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: A Collection of Analytical Scripts to Process Pottery Data
+Version: 1.0.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Joel", "Harris", , "joelharris251@gmail.com", role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0009-0004-1067-6546"))
+Description: Scripts to process pottery data in a RevBayes format, plot trees, analyse RevBayes ouputs, etc.
+License: MIT + file LICENSE
+URL: https://github.com/joelh251/potTreeToolkit
+BugReports: https://github.com/joelh251/potTreeToolkit/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0

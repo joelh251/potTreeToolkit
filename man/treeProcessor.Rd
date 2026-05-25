@@ -6,11 +6,19 @@
 \description{
 Read and plots trees
 }
+\section{Public fields}{
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{data}}{Beast formatted tree}
+  }
+  \if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
     \item \href{#method-treeProcessor-initialize}{\code{treeProcessor$new()}}
     \item \href{#method-treeProcessor-tree_with_images}{\code{treeProcessor$tree_with_images()}}
+    \item \href{#method-treeProcessor-collapsed_posterior_tree}{\code{treeProcessor$collapsed_posterior_tree()}}
     \item \href{#method-treeProcessor-clone}{\code{treeProcessor$clone()}}
   }
 }
@@ -18,9 +26,17 @@ Read and plots trees
 \if{html}{\out{<a id="method-treeProcessor-initialize"></a>}}
 \if{latex}{\out{\hypertarget{method-treeProcessor-initialize}{}}}
 \subsection{\code{treeProcessor$new()}}{
+  Initialises the treeProcessor class
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{treeProcessor$new(filename, plotname = "tree.png")}
+    \preformatted{treeProcessor$new(filename)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{filename}}{Path to tree file}
+    }
     \if{html}{\out{</div>}}
   }
 }
@@ -29,10 +45,52 @@ Read and plots trees
 \if{html}{\out{<a id="method-treeProcessor-tree_with_images"></a>}}
 \if{latex}{\out{\hypertarget{method-treeProcessor-tree_with_images}{}}}
 \subsection{\code{treeProcessor$tree_with_images()}}{
+  Plots a tree with images as tip labels
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{treeProcessor$tree_with_images(image_dir)}
+    \preformatted{treeProcessor$tree_with_images(image_dir, plotname = "tree.pdf")}
     \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{image_dir}}{Directory to find pot images}
+      \item{\code{plotname}}{Filename for output}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Tree with images as tip labels
+  }
+}
+
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-treeProcessor-collapsed_posterior_tree"></a>}}
+\if{latex}{\out{\hypertarget{method-treeProcessor-collapsed_posterior_tree}{}}}
+\subsection{\code{treeProcessor$collapsed_posterior_tree()}}{
+  Plots a tree with images as tip labels
+
+Collapses poorly supported nodes into multichotomies
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{treeProcessor$collapsed_posterior_tree(
+  image_dir,
+  posterior_threshold = 0.5,
+  plotname = "collapsed_tree.pdf"
+)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{image_dir}}{Directory to find pot images}
+      \item{\code{posterior_threshold}}{Threshold for node support (default = 0.5)}
+      \item{\code{plotname}}{Filename for output}
+    }
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Returns}{
+    Tree with images as tip labels
   }
 }
 
