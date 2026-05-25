@@ -8,6 +8,19 @@ Description: Scripts to process pottery data in a RevBayes format, plot trees, a
 License: MIT + file LICENSE
 URL: https://github.com/joelh251/potTreeToolkit
 BugReports: https://github.com/joelh251/potTreeToolkit/issues
+Imports:
+  ape,
+  dplyr,
+  ggimage,
+  ggplot2,
+  ggtree,
+  ggtreeExtra,
+  phangorn,
+  R6,
+  readr,
+  stringr,
+  tidyr,
+  treeio
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
