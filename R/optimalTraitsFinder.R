@@ -53,7 +53,7 @@ optimalTraitsFinder <- R6Class("optimalTraitsFinder",
       self$RF_distances$RF <- sapply(1:nrow(self$RF_distances), function(i) {
         RF.dist(self$trees[[self$RF_distances$X[i]]],
                 self$trees[[self$RF_distances$Y[i]]],
-                normalize  = FALSE,
+                normalize  = TRUE,
                 rooted     = TRUE,
                 check.labels = TRUE)
       })
@@ -66,7 +66,11 @@ optimalTraitsFinder <- R6Class("optimalTraitsFinder",
     generate_RF_heatmap = function() {
       plot <- ggplot(self$RF_distances, aes(x=X, y=Y, fill = RF)) +
         geom_tile() +
-        theme_bw()
+        theme_bw() +
+        labs(
+          x = "PCs",
+          y = "PCs"
+        )
 
       print(plot)
     },
