@@ -135,7 +135,7 @@ potDataProcessor <- R6Class("potDataProcessor",
         theme_bw() +
         coord_fixed(ratio = 1) +
         theme(
-          legend.position = "bottom"
+          legend.position = "right"
         )
 
       # Optionally add elipses
