@@ -98,6 +98,16 @@ treeProcessor <- R6Class("treeProcessor",
         width = 10,
         height = 10
       )
+    },
+
+    #' @description
+    #' Calculates summary tree statistics
+    tree_stats = function() {
+      mean_post <- mean(self$data@data$posterior, na.rm = TRUE)
+      sd_post <- sd(self$data@data$posterior, na.rm = TRUE)
+
+      message(paste("Mean posterior probability is", mean_post))
+      message(paste("Stdev of posterior probability is", sd_post))
     }
   )
 )
