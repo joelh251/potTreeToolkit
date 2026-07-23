@@ -6,6 +6,7 @@
 #' @import ggplot2
 #' @import tidyr
 #' @import dplyr
+#' @importFrom purrr map_df
 #' @importFrom scales hue_pal
 #' @importFrom readr write_tsv
 #' @importFrom ape as.phylo
@@ -32,6 +33,18 @@ potDataProcessor <- R6Class("potDataProcessor",
     pair_sample_taxa_data = NULL,
     #' @field dendrogram Ward tree of pots as a phylo object
     dendrogram = NULL,
+    #' @field discrete_character_data Discretised character data
+    discrete_character_data = NULL,
+    #' @field character_table Conversion table for characters
+    character_table = NULL,
+    #' @field step_matrix Step matrix for discrete characters
+    step_matrix = NULL,
+    #' @field Q Q matrix for discrete characters
+    Q = NULL,
+    #' @field rate_vectors RevBayes' formatted Q matrices
+    rate_vectors = list(),
+    #' @field all_symbols All symbols used to denote character states
+    all_symbols = NULL,
 
     #' @description
     #' Initialises potDataProcessor class
@@ -110,6 +123,8 @@ potDataProcessor <- R6Class("potDataProcessor",
       if (save_dir != "") {
         character_data_path <- paste0(save_dir, "/", character_data_filename, ".nex")
         taxa_data_path <- paste0(save_dir, "/", taxa_data_filename, ".tsv")
+
+        dir.create(paste0(save_dir, "/"), recursive=TRUE, showWarnings=FALSE)
 
         write.nexus.data(self$character_data, file = character_data_path, format = "continuous")
         write_tsv(self$taxa_data, taxa_data_path)
@@ -367,9 +382,196 @@ potDataProcessor <- R6Class("potDataProcessor",
           }
         }
       }
+    },
+
+    #' @decription
+    #'
+    map_continuous_to_discrete = function(window_size = 2,
+                                          save_dir = "",
+                                          character_data_filename = "discrete_character_data",
+                                          taxa_data_filename = "taxa_data",
+                                          q_matrix_filename = "q_matrix") {
+
+      if (is.null(self$character_data)) {
+        self$generate_revbayes_data()
+      }
+
+      private$define_character_map(window_size = window_size)
+
+
+
+
+      mapping_helper <- function(col) {
+        cut(
+          col,
+          breaks = private$character_map$breaks,
+          labels = private$character_map$states,
+          include.lowest = TRUE,
+          right = FALSE
+        )
+      }
+
+      row_names <- rownames(self$character_data)
+
+      self$discrete_character_data <- apply(self$character_data, MARGIN = 2, FUN = mapping_helper)
+
+      self$discrete_character_data <- self$discrete_character_data[
+        , apply(self$discrete_character_data, 2,
+                function(col) length(unique(na.omit(col))) > 1),
+        drop = FALSE
+      ]
+
+      self$generate_step_matrix()
+      self$generate_Q_matrix()
+      self$write_rate_vectors()
+
+      rownames(self$discrete_character_data) <- row_names
+
+      if (save_dir != "") {
+        character_data_path <- paste0(save_dir, "/", character_data_filename, ".nex")
+        taxa_data_path <- paste0(save_dir, "/", taxa_data_filename, ".tsv")
+        q_matrix_path <- paste0(save_dir, "/matrices/", q_matrix_filename)
+
+        dir.create(paste0(save_dir, "/matrices/"), recursive=TRUE, showWarnings=FALSE)
+
+        write.nexus.data(self$discrete_character_data, file = character_data_path, format = "standard")
+        write_tsv(self$taxa_data, taxa_data_path)
+
+        invisible(lapply(seq_along(self$rate_vectors), function(i) {
+          filename <- paste0(q_matrix_path, "_", i, ".csv")
+          write.csv(data.frame(x=sprintf("%f", self$rate_vectors[[i]])),
+                    file=filename,
+                    row.names=FALSE,
+                    quote=FALSE)
+        }))
+
+        message("Paste the following into the SYMBOL field of the nexus file:")
+        message(paste0(rownames(self$Q), collapse = ""))
+      }
+    },
+
+    #' @description
+    #'
+    generate_step_matrix = function() {
+
+      if (is.null(private$character_map)) {
+        self$map_continuous_to_discrete()
+      }
+
+      self$character_table <- data.frame(
+        value = private$character_map$breaks[
+          1:(length(private$character_map$breaks) - 1)] +
+          (private$character_map$window / 2),
+        state = private$character_map$states
+      )
+      self$character_table$score <- (
+        (self$character_table$value - min(self$character_table$value)) /
+          (max(self$character_table$value) - min(self$character_table$value))
+        ) * 1000
+
+      self$step_matrix <- matrix(ncol = nrow(self$character_table),
+                            nrow = nrow(self$character_table)
+      )
+      rownames(self$step_matrix) <- self$character_table$state
+      colnames(self$step_matrix) <- self$character_table$state
+
+      self$step_matrix[1,] <- self$character_table$score
+      self$step_matrix[,1] <- self$character_table$score
+
+      for (i in 2:nrow(self$step_matrix)) {
+        for (j in 2:nrow(self$step_matrix)) {
+          self$step_matrix[i, j] <- abs(self$character_table$score[j] - self$character_table$score[i])
+        }
+      }
+    },
+
+    #' @description
+    #'
+    generate_Q_matrix = function(transformation = "linear", normalise = FALSE) {
+
+      if (is.null(self$step_matrix)) {
+        self$generate_step_matrix()
+      }
+
+      if (transformation == "linear") {
+        self$Q <- (1000 - self$step_matrix) / 1000
+      } else if (transformation == "reciprocal") {
+        self$Q <- 1 / (self$step_matrix + 0.00000001)
+      }
+
+      diag(self$Q) <- 0
+      diag(self$Q) <- -rowSums(self$Q)
+
+      if (normalise) {
+        s_pi <- rep(1/nrow(self$Q), nrow(self$Q))
+        mu <- -sum(s_pi * diag(self$Q))
+        self$Q <- self$Q / mu
+      }
+
+      self$all_symbols <- rownames(self$Q)
+    },
+
+    #' @description
+    #'
+    write_rate_vectors = function() {
+      if (is.null(self$Q)) {
+        self$generate_Q_matrix()
+      }
+
+      helper <- function(col) {
+        # Filter missing values
+        observed <- sort(unique(col[!col %in% c(NA, "NA", "?")]))
+
+        # Subset and recompute Q
+        sub_Q <- self$Q[observed, observed]
+        diag(sub_Q) <- 0
+        diag(sub_Q) <- -rowSums(sub_Q)
+
+        # Remap column to contiguous symbols
+        k <- nrow(sub_Q)
+        new_symbols <- self$all_symbols[1:k]
+        mapping <- setNames(new_symbols, observed)
+        remapped_col <- ifelse(col %in% c(NA, "NA", "?"), "?", mapping[col])
+
+        # Rename Q rows/cols to new contiguous symbols
+        rownames(sub_Q) <- new_symbols
+        colnames(sub_Q) <- new_symbols
+
+        # Extract rates vector
+        rates_vector <- numeric(k * (k - 1))
+        idx <- 1
+        for (i in 1:k) {
+          for (j in 1:k) {
+            if (i != j) {
+              rates_vector[idx] <- sub_Q[i, j]
+              idx <- idx + 1
+            }
+          }
+        }
+
+        return(list(
+          rates_vector   = rates_vector,
+          remapped_col   = remapped_col
+        ))
+      }
+
+      results <- lapply(as.data.frame(self$discrete_character_data), helper)
+
+      # Split results into rate vectors and remapped data
+      self$rate_vectors <- lapply(results, `[[`, "rates_vector")
+      self$discrete_character_data <- as.matrix(
+        as.data.frame(lapply(results, `[[`, "remapped_col"))
+      )
+
     }
   ),
   private = list(
+    #' field multistate_symbols Vector of allowed symbols for multistate characters
+    multistate_symbols = c(as.character(0:9), LETTERS, letters),
+
+    #' field character_map
+    character_map = NULL,
+
     #' description
     #' Converts dates from BCE/AD to years before present
     #' param date Date
@@ -480,6 +682,27 @@ potDataProcessor <- R6Class("potDataProcessor",
 
         self_ref$data$pair[self_ref$data$type %in% pair_taxa] <- pair_label
       }
+    },
+
+    #' description
+    #'
+    define_character_map = function(window_size = 2) {
+      max_value <- max(self$character_data, na.rm = TRUE)
+      min_value <- min(self$character_data, na.rm = TRUE)
+      breaks <- c(seq(min_value, max_value, by = window_size), max_value) |> unique()
+
+      if (length(breaks) > length(private$multistate_symbols) + 1) {
+        stop(paste("Window size too small\n",
+                      "Minimum window size is",
+                      diff(range(self$character_data)) /
+                        length(private$multistate_symbols)))
+      }
+
+      private$character_map <- list(
+        breaks = breaks,
+        window = window_size,
+        states = private$multistate_symbols[1:(length(breaks) - 1)]
+      )
     }
   )
 )
